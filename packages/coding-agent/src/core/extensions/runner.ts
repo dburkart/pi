@@ -554,8 +554,16 @@ export class ExtensionRunner {
 		return this.commandDiagnostics;
 	}
 
+	/** Resolve a command by exact name, falling back to unambiguous prefix match. */
 	getCommand(name: string): ResolvedCommand | undefined {
-		return this.resolveRegisteredCommands().find((command) => command.invocationName === name);
+		const commands = this.resolveRegisteredCommands();
+		const exact = commands.find((command) => command.invocationName === name);
+		if (exact) return exact;
+		if (name.length > 0) {
+			const prefixMatches = commands.filter((command) => command.invocationName.startsWith(name));
+			if (prefixMatches.length === 1) return prefixMatches[0];
+		}
+		return undefined;
 	}
 
 	/**
